@@ -4,26 +4,6 @@ This project is a FastAPI application connected to a PostgreSQL database. The ap
 
 ---
 
-## Project Structure
-
-covent/
-├── backend/
-│   ├── app/
-│   │   ├── main.py          # FastAPI entry point
-│   │   ├── database.py      # Database connection setup
-│   │   ├── models.py        # SQLAlchemy models
-│   │   ├── routers/         # API route handlers
-│   │   └── ...
-│   ├── migrations/          # Alembic migration files
-│   │   ├── versions/        # Generated migration scripts
-│   │   └── env.py           # Alembic configuration
-│   ├── alembic.ini          # Alembic settings
-│   └── requirements.txt     # Project dependencies
-├── db/                      # Database initialization scripts (optional)
-├── frontend/                # Frontend application (if applicable)
-└── README.md                # Project documentation
-
-
 ## Table of Contents
 
 1. [Requirements](#requirements)
@@ -91,3 +71,21 @@ Ensure that the `.env` file is correctly configured with your database credentia
 To run the FastAPI application locally, use the following command:
 ```bash
 uvicorn app.main:app --reload
+```
+---
+
+## Testing 
+
+This project uses pytest for testing and pytest-cov for generating test coverage reports. Follow the steps below to run the tests and check the coverage:
+
+To run the tests, use the following command:
+
+```bash
+pytest
+```
+
+### Running Tests With Coverage
+
+```bash
+pytest --cov=app --cov-report=term
+```
