@@ -1,2 +1,3 @@
 [submodule "frontend"]
 	url = https://github.com/MachopCodes/covent-frontend.git
+	path = frontend
