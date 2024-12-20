@@ -1,9 +1,11 @@
 from sqlalchemy import Column, Integer, String, JSON
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 
-Base = declarative_base()
 
-class Profile(Base):
+class Base(DeclarativeBase):
+    pass
+
+class DBProfile(Base):
     __tablename__ = "profiles"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
