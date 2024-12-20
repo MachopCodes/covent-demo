@@ -7,6 +7,8 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+app.include_router(profiles.router)
+
 @app.get('/')
 def read_root():
     return {"hello": "world"}
