@@ -1,0 +1,72 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# C extensions
+*.so
+
+# Environment variables
+.env
+*.env
+
+# Database files
+*.db
+*.sqlite3
+
+# Alembic migrations cache
+migrations/versions/*.pyc
+
+# macOS files
+.DS_Store
+
+# Logs and runtime files
+*.log
+*.pid
+*.seed
+*.lock
+
+# Virtual environments
+venv/
+env/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+*.wheel
+
+# Pytest
+.pytest_cache/
+.cache/
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+
+# Frontend build files (if applicable)
+node_modules/
+dist/
+*.js.map
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+*.cover
+*.py,cover
+*.coverage
+
+# Temporary files
+*.bak
+*.tmp
+*.temp
+~$
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
