@@ -60,7 +60,7 @@ Ensure that the `.env` file is correctly configured with your database credentia
 
 ## Running the Application
 
-To run the FastAPI application locally, use the following command:
+To run the FastAPI application locally, use the following command in the backend directoryhg:
 ```bash
 uvicorn app.main:app --reload
 ```

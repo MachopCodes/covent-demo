@@ -1,4 +1,4 @@
-from app.models.base import Base
-from app.models.sponsors import DBSponsor
+from .base import Base
+from .sponsors import DBSponsor
 
-__all__ = ["Base", "DBProfile"]
+__all__ = ["Base", "DBSponsor"]

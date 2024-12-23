@@ -1,8 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float, JSON, ARRAY
+from sqlalchemy import Column, Integer, String, Float
 from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
-from sqlalchemy.ext.declarative import declarative_base
+from .base import Base
 
-Base = declarative_base()
 
 class DBSponsor(Base):
     __tablename__ = "sponsors"
