@@ -69,11 +69,16 @@ def update_sponsor(
     db_item = db.query(DBSponsor).filter(DBSponsor.id == sponsor_id).first()
     if db_item is None:
         raise HTTPException(status_code=404, detail="Sponsor not found")
+    
+    if db_item.user_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You are not authorized to update this sponsor")
+    
     for key, value in sponsor.model_dump(exclude_unset=True).items():
         setattr(db_item, key, value)
     db.commit()
     db.refresh(db_item)
     return Sponsor.model_validate(db_item)
+
 
 
 @router.delete("/{sponsor_id}", response_model=Sponsor)
@@ -83,11 +88,21 @@ def delete_sponsor(
     current_user: dict = Depends(get_current_user)
 ) -> Sponsor:
     """
-    Delete a sponsor from the database.
+    Delete a sponsor from the database if the current user owns it.
     """
+    # Retrieve the sponsor by ID
     db_item = db.query(DBSponsor).filter(DBSponsor.id == sponsor_id).first()
-    if db_item is None:
+    
+    if not db_item:
         raise HTTPException(status_code=404, detail="Sponsor not found")
+
+    # Check if the sponsor belongs to the current user
+    if db_item.user_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You are not authorized to delete this sponsor")
+
+    # Delete the sponsor
     db.delete(db_item)
     db.commit()
+
+    # Return the deleted sponsor
     return Sponsor.model_validate(db_item)

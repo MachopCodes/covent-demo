@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 
@@ -14,9 +14,8 @@ class Sponsor(BaseModel):
     key_objectives_for_event_sponsorship: List[str]
     user_id: int  # New field
 
-    class Config:
-        orm_mode = True
 
+    model_config = ConfigDict(from_attributes=True)
 
 class SponsorCreate(BaseModel):
     name: str
