@@ -10,19 +10,6 @@ router = APIRouter(
 )
 
 
-@router.post("/", response_model=User)
-def create_user(user: UserCreate, db: Session = Depends(get_db)) -> User:
-    existing_user = db.query(DBUser).filter(DBUser.email == user.email).first()
-    if existing_user:
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    db_user = DBUser(**user.model_dump())
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return User.model_validate(db_user)
-
-
 @router.get("/", response_model=list[User])
 def list_users(db: Session = Depends(get_db)) -> list[User]:
     users = db.query(DBUser).all()
