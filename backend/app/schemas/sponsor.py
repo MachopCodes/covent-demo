@@ -1,35 +1,42 @@
-from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
+from typing import List
+
 
 class Sponsor(BaseModel):
     id: int
     name: str
     job_title: str
     company_name: str
-    budget: int
+    budget: float
     industry: str
     topics: List[str]
     event_attendee_personas: List[str]
     key_objectives_for_event_sponsorship: List[str]
+    user_id: int  # New field
 
-    model_config = ConfigDict(from_attributes=True)
+    class Config:
+        orm_mode = True
+
 
 class SponsorCreate(BaseModel):
     name: str
     job_title: str
     company_name: str
-    budget: int
+    budget: float
     industry: str
     topics: List[str]
     event_attendee_personas: List[str]
     key_objectives_for_event_sponsorship: List[str]
+    user_id: int  # New field
+
 
 class SponsorUpdate(BaseModel):
-    name: Optional[str]
-    job_title: Optional[str]
-    company_name: Optional[str]
-    budget: Optional[int]
-    industry: Optional[str]
-    topics: Optional[List[str]]
-    event_attendee_personas: Optional[List[str]]
-    key_objectives_for_event_sponsorship: Optional[List[str]]
+    name: str
+    job_title: str
+    company_name: str
+    budget: float
+    industry: str
+    topics: List[str]
+    event_attendee_personas: List[str]
+    key_objectives_for_event_sponsorship: List[str]
+    user_id: int  # New field

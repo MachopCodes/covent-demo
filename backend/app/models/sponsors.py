@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import ARRAY as PG_ARRAY
-from .base import Base
+from app.models.base import Base
 
 
 class DBSponsor(Base):
@@ -15,3 +16,9 @@ class DBSponsor(Base):
     topics = Column(PG_ARRAY(String), nullable=False)  # PostgreSQL ARRAY
     event_attendee_personas = Column(PG_ARRAY(String), nullable=False)  # PostgreSQL ARRAY
     key_objectives_for_event_sponsorship = Column(PG_ARRAY(String), nullable=False)  # PostgreSQL ARRAY
+
+    # Foreign Key to link to the User table
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Relationship to link to the User model
+    user = relationship("DBUser", back_populates="sponsors")
