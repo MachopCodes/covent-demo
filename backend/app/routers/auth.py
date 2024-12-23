@@ -5,6 +5,7 @@ from app.database import get_db
 from app.models.users import DBUser
 from app.schemas.user import UserCreate, UserLogin
 from app.utils.jwt import verify_password, get_password_hash, create_access_token
+from fastapi.security import OAuth2PasswordRequestForm
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -22,8 +23,22 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
-    db_user = db.query(DBUser).filter(DBUser.email == user.email).first()
+    db_user = db.query(DBUser).filter(DBUser.name == user.name).first()
     if not db_user or not verify_password(user.password, db_user.hashed_password):
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    access_token = create_access_token({"sub": str(db_user.id)})
+    access_token = create_access_token(db_user.id)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post("/token", tags=["Authentication"])
+def oauth2_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    """
+    OAuth2 compatible token login, for Swagger "Authorize" button.
+    """
+    user = db.query(DBUser).filter(DBUser.name == form_data.username).first()
+
+    if not user or not verify_password(form_data.password, user.hashed_password):
+        raise HTTPException(status_code=400, detail="Invalid credentials")
+
+    access_token = create_access_token(user.id)
     return {"access_token": access_token, "token_type": "bearer"}

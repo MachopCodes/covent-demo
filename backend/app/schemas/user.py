@@ -20,5 +20,5 @@ class UserUpdate(BaseModel):
     email: EmailStr | None = None
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    name: str
     password: str

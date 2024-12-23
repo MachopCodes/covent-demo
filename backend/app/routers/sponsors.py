@@ -1,8 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models import DBSponsor  # SQLAlchemy model
 from app.schemas import Sponsor, SponsorCreate, SponsorUpdate  # Pydantic schemas
 from app.database import get_db
+from app.utils.dependencies import get_current_user  # JWT token validation dependency
+from app.models import DBUser
 
 router = APIRouter(
     prefix="/sponsors",
@@ -11,11 +13,16 @@ router = APIRouter(
 
 
 @router.post("/", response_model=Sponsor)
-def create_sponsor(sponsor: SponsorCreate, db: Session = Depends(get_db)) -> Sponsor:
+def create_sponsor(
+    sponsor: SponsorCreate,
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)  # Ensure current_user is a DBUser instance
+) -> Sponsor:
     """
-    Create a new sponsor and save it to the database.
+    Create a new sponsor and associate it with the current user.
     """
-    db_item = DBSponsor(**sponsor.model_dump())
+    # Create the sponsor object with the current user's ID
+    db_item = DBSponsor(**sponsor.model_dump(), user_id=current_user.id)
     db.add(db_item)
     db.commit()
     db.refresh(db_item)
@@ -23,7 +30,10 @@ def create_sponsor(sponsor: SponsorCreate, db: Session = Depends(get_db)) -> Spo
 
 
 @router.get("/", response_model=list[Sponsor])
-def list_sponsors(db: Session = Depends(get_db)) -> list[Sponsor]:
+def list_sponsors(
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+) -> list[Sponsor]:
     """
     Retrieve a list of all sponsors.
     """
@@ -32,7 +42,11 @@ def list_sponsors(db: Session = Depends(get_db)) -> list[Sponsor]:
 
 
 @router.get("/{sponsor_id}", response_model=Sponsor)
-def read_sponsor(sponsor_id: int, db: Session = Depends(get_db)) -> Sponsor:
+def read_sponsor(
+    sponsor_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+) -> Sponsor:
     """
     Retrieve details of a specific sponsor by ID.
     """
@@ -43,7 +57,12 @@ def read_sponsor(sponsor_id: int, db: Session = Depends(get_db)) -> Sponsor:
 
 
 @router.put("/{sponsor_id}", response_model=Sponsor)
-def update_sponsor(sponsor_id: int, sponsor: SponsorUpdate, db: Session = Depends(get_db)) -> Sponsor:
+def update_sponsor(
+    sponsor_id: int,
+    sponsor: SponsorUpdate,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+) -> Sponsor:
     """
     Update an existing sponsor's details.
     """
@@ -58,7 +77,11 @@ def update_sponsor(sponsor_id: int, sponsor: SponsorUpdate, db: Session = Depend
 
 
 @router.delete("/{sponsor_id}", response_model=Sponsor)
-def delete_sponsor(sponsor_id: int, db: Session = Depends(get_db)) -> Sponsor:
+def delete_sponsor(
+    sponsor_id: int,
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)
+) -> Sponsor:
     """
     Delete a sponsor from the database.
     """

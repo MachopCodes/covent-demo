@@ -18,7 +18,7 @@ class DBSponsor(Base):
     key_objectives_for_event_sponsorship = Column(PG_ARRAY(String), nullable=False)  # PostgreSQL ARRAY
 
     # Foreign Key to link to the User table
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 
     # Relationship to link to the User model
     user = relationship("DBUser", back_populates="sponsors")
