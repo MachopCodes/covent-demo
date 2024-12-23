@@ -12,3 +12,4 @@ class DBUser(Base):
 
     # Relationship to link to the Sponsor model
     sponsors = relationship("DBSponsor", back_populates="user")
+    events = relationship("DBEvents", back_populates="user")

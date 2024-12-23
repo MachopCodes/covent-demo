@@ -4,10 +4,13 @@ from app.models import DBSponsor  # SQLAlchemy model
 from app.schemas import Sponsor, SponsorCreate, SponsorUpdate  # Pydantic schemas
 from app.database import get_db
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/sponsors",
+    tags=["Sponsors"]
+)
 
 
-@router.post("/sponsors", response_model=Sponsor)
+@router.post("/", response_model=Sponsor)
 def create_sponsor(sponsor: SponsorCreate, db: Session = Depends(get_db)) -> Sponsor:
     """
     Create a new sponsor and save it to the database.
@@ -19,7 +22,7 @@ def create_sponsor(sponsor: SponsorCreate, db: Session = Depends(get_db)) -> Spo
     return Sponsor.model_validate(db_item)
 
 
-@router.get("/sponsors", response_model=list[Sponsor])
+@router.get("/", response_model=list[Sponsor])
 def list_sponsors(db: Session = Depends(get_db)) -> list[Sponsor]:
     """
     Retrieve a list of all sponsors.
@@ -28,7 +31,7 @@ def list_sponsors(db: Session = Depends(get_db)) -> list[Sponsor]:
     return [Sponsor.model_validate(db_item) for db_item in db_items]
 
 
-@router.get("/sponsors/{sponsor_id}", response_model=Sponsor)
+@router.get("/{sponsor_id}", response_model=Sponsor)
 def read_sponsor(sponsor_id: int, db: Session = Depends(get_db)) -> Sponsor:
     """
     Retrieve details of a specific sponsor by ID.
@@ -39,7 +42,7 @@ def read_sponsor(sponsor_id: int, db: Session = Depends(get_db)) -> Sponsor:
     return Sponsor.model_validate(db_item)
 
 
-@router.put("/sponsors/{sponsor_id}", response_model=Sponsor)
+@router.put("/{sponsor_id}", response_model=Sponsor)
 def update_sponsor(sponsor_id: int, sponsor: SponsorUpdate, db: Session = Depends(get_db)) -> Sponsor:
     """
     Update an existing sponsor's details.
@@ -54,7 +57,7 @@ def update_sponsor(sponsor_id: int, sponsor: SponsorUpdate, db: Session = Depend
     return Sponsor.model_validate(db_item)
 
 
-@router.delete("/sponsors/{sponsor_id}", response_model=Sponsor)
+@router.delete("/{sponsor_id}", response_model=Sponsor)
 def delete_sponsor(sponsor_id: int, db: Session = Depends(get_db)) -> Sponsor:
     """
     Delete a sponsor from the database.
