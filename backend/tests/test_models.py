@@ -1,107 +1,70 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from app.models import Base, DBProfile
+from sqlalchemy.exc import IntegrityError
+from app.models import Base, DBSponsor
+from tests.test_utils import adapt_model_to_sqlite
 
 # Test setup: use an in-memory SQLite database for tests
-@pytest.fixture(scope="module")
-def test_db():
-    engine = create_engine("sqlite:///:memory:", echo=True)
-    Base.metadata.create_all(bind=engine)
-    Session = sessionmaker(bind=engine)
-    return Session()
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.exc import IntegrityError
-from app.models import Base, DBProfile
-
 DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-def setup_module(module):
-    """Create tables in the test database."""
-    Base.metadata.create_all(bind=engine)
+# Apply model adaptation for SQLite
+adapt_model_to_sqlite(engine, DBSponsor)
 
-def teardown_module(module):
-    """Drop tables in the test database."""
+@pytest.fixture(scope="module")
+def test_db():
+    """Create the test database and return a session."""
+    Base.metadata.create_all(bind=engine)
+    Session = TestingSessionLocal()
+    yield Session
+    Session.close()
     Base.metadata.drop_all(bind=engine)
 
-def test_insert_record():
-    """Test inserting a record into the profiles table."""
-    session = TestingSessionLocal()
-    profile = DBProfile(
-        name="Test User",
-        email="test@example.com",
-        description="Test description",
-        budget_max=1000,
-        target_audiences=["students", "professionals"],
-        objectives=["education", "training"]
+def test_insert_record(test_db):
+    """Test inserting a record into the sponsors table."""
+    session = test_db
+    sponsor = DBSponsor(
+        name="Test Sponsor",
+        job_title="Marketing Manager",
+        company_name="Innovative Tech Inc.",
+        budget=5000.0,
+        industry="Technology",
+        topics=["AI", "Blockchain"],
+        event_attendee_personas=["Developers", "Executives"],
+        key_objectives_for_event_sponsorship=["Brand Awareness", "Networking"]
     )
-    session.add(profile)
+    session.add(sponsor)
     session.commit()
 
     # Verify the record was inserted
-    db_profile = session.query(DBProfile).filter(DBProfile.email == "test@example.com").first()
-    assert db_profile is not None, "Profile was not inserted"
-    assert db_profile.name == "Test User"
-    session.close()
+    db_sponsor = session.query(DBSponsor).filter(DBSponsor.name == "Test Sponsor").first()
+    assert db_sponsor is not None, "Sponsor was not inserted"
+    assert db_sponsor.name == "Test Sponsor"
 
-def test_unique_email_constraint():
-    """Test unique constraint on the email field."""
-    session = TestingSessionLocal()
-    profile1 = DBProfile(
-        name="User One",
-        email="unique@example.com",
-        description="First user",
-        budget_max=500,
-        target_audiences=["students"],
-        objectives=["education"]
-    )
-    profile2 = DBProfile(
-        name="User Two",
-        email="unique@example.com",
-        description="Second user",
-        budget_max=700,
-        target_audiences=["professionals"],
-        objectives=["training"]
-    )
-    session.add(profile1)
+def test_update_record(test_db):
+    """Test updating a record in the sponsors table."""
+    session = test_db
+    sponsor = session.query(DBSponsor).filter(DBSponsor.name == "Test Sponsor").first()
+    assert sponsor is not None, "Sponsor to update was not found"
+
+    # Update the sponsor's budget
+    sponsor.budget = 7000.0
     session.commit()
 
-    try:
-        session.add(profile2)
-        session.commit()
-    except IntegrityError:
-        session.rollback()
-    else:
-        assert False, "Unique constraint on email did not raise an error"
-    session.close()
+    updated_sponsor = session.query(DBSponsor).filter(DBSponsor.name == "Test Sponsor").first()
+    assert updated_sponsor.budget == 7000.0, "Sponsor budget was not updated"
 
-def test_update_record():
-    """Test updating a record in the profiles table."""
-    session = TestingSessionLocal()
-    profile = session.query(DBProfile).filter(DBProfile.email == "test@example.com").first()
-    assert profile is not None, "Profile to update was not found"
-    
-    # Update the profile's budget
-    profile.budget_max = 1500
+def test_delete_record(test_db):
+    """Test deleting a record from the sponsors table."""
+    session = test_db
+    sponsor = session.query(DBSponsor).filter(DBSponsor.name == "Test Sponsor").first()
+    assert sponsor is not None, "Sponsor to delete was not found"
+
+    # Delete the sponsor
+    session.delete(sponsor)
     session.commit()
 
-    updated_profile = session.query(DBProfile).filter(DBProfile.email == "test@example.com").first()
-    assert updated_profile.budget_max == 1500, "Profile budget was not updated"
-    session.close()
-
-def test_delete_record():
-    """Test deleting a record from the profiles table."""
-    session = TestingSessionLocal()
-    profile = session.query(DBProfile).filter(DBProfile.email == "test@example.com").first()
-    assert profile is not None, "Profile to delete was not found"
-    
-    # Delete the profile
-    session.delete(profile)
-    session.commit()
-
-    deleted_profile = session.query(DBProfile).filter(DBProfile.email == "test@example.com").first()
-    assert deleted_profile is None, "Profile was not deleted"
-    session.close()
+    deleted_sponsor = session.query(DBSponsor).filter(DBSponsor.name == "Test Sponsor").first()
+    assert deleted_sponsor is None, "Sponsor was not deleted"

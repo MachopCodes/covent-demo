@@ -36,15 +36,7 @@ This project is a FastAPI application connected to a PostgreSQL database. The ap
 
 2. **Create a Database and User**:
    - Log into PostgreSQL using the `psql` CLI:
-     ```bash
-     psql -U postgres
-     ```
    - Create a new database and user:
-     ```sql
-     CREATE DATABASE mydatabase;
-     CREATE USER myuser WITH PASSWORD 'mypassword';
-     GRANT ALL PRIVILEGES ON DATABASE mydatabase TO myuser;
-     ```
 
 3. **Test the Connection**:
    - Verify that the new user can access the database:

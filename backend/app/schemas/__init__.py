@@ -1,1 +1,1 @@
-from .profile import Profile, ProfileCreate, ProfileUpdate
+from .sponsor import Sponsor, SponsorCreate, SponsorUpdate

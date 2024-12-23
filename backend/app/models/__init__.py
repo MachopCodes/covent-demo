@@ -1,4 +1,4 @@
 from app.models.base import Base
-from app.models.profiles import DBProfile
+from app.models.sponsors import DBSponsor
 
 __all__ = ["Base", "DBProfile"]
