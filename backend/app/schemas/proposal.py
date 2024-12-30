@@ -1,11 +1,10 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List, Literal, Optional
-
+from typing import Optional
+from app.models.proposals import ProposalStatus
 
 class EventSnapshot(BaseModel):
     name: str
-    date: str
-
+    date: Optional[str] = None
 
 class SponsorSnapshot(BaseModel):
     name: str
@@ -19,7 +18,7 @@ class Proposal(BaseModel):
     owner_id: int
     notes: Optional[str] = Field(None, description="Additional details about the proposal")
     contact_info: Optional[str] = Field(None, description="Sponsor's contact information")
-    status: Literal['Approved', 'Pending', 'Rejected']
+    status: ProposalStatus
     event_snapshot: EventSnapshot
     sponsor_snapshot: SponsorSnapshot
 
@@ -31,7 +30,7 @@ class ProposalCreate(BaseModel):
     sponsor_id: int
     notes: Optional[str] = Field(None, description="Additional details about the proposal")
     contact_info: Optional[str] = Field(None, description="Sponsor's contact information")
-    status: Literal['Approved', 'Pending', 'Rejected'] = 'Pending'
+    status: ProposalStatus = 'PENDING'
     event_snapshot: EventSnapshot
     sponsor_snapshot: SponsorSnapshot
 
@@ -39,4 +38,4 @@ class ProposalCreate(BaseModel):
 class ProposalUpdate(BaseModel):
     notes: Optional[str] = Field(None, description="Additional details about the proposal")
     contact_info: Optional[str] = Field(None, description="Sponsor's contact information")
-    status: Optional[Literal['Approved', 'Pending', 'Rejected']] = None
+    status: Optional[ProposalStatus] = None

@@ -5,9 +5,9 @@ from app.models.base import Base
 
 # Enum for status
 class ProposalStatus(enum.Enum):
-    APPROVED = "Approved"
-    PENDING = "Pending"
-    REJECTED = "Rejected"
+    APPROVED = "APPROVED"
+    PENDING = "PENDING"
+    REJECTED = "REJECTED"
 
 class DBProposal(Base):
     __tablename__ = "proposals"
