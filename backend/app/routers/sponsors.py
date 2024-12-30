@@ -45,7 +45,6 @@ def list_sponsors(
 def read_sponsor(
     sponsor_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
 ) -> Sponsor:
     """
     Retrieve details of a specific sponsor by ID.
@@ -61,7 +60,7 @@ def update_sponsor(
     sponsor_id: int,
     sponsor: SponsorUpdate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: DBUser = Depends(get_current_user)
 ) -> Sponsor:
     """
     Update an existing sponsor's details.
@@ -70,7 +69,7 @@ def update_sponsor(
     if db_item is None:
         raise HTTPException(status_code=404, detail="Sponsor not found")
     
-    if db_item.user_id != current_user["id"]:
+    if db_item.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not authorized to update this sponsor")
     
     for key, value in sponsor.model_dump(exclude_unset=True).items():
@@ -85,7 +84,7 @@ def update_sponsor(
 def delete_sponsor(
     sponsor_id: int,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)
+    current_user: DBUser = Depends(get_current_user)
 ) -> Sponsor:
     """
     Delete a sponsor from the database if the current user owns it.
@@ -97,7 +96,7 @@ def delete_sponsor(
         raise HTTPException(status_code=404, detail="Sponsor not found")
 
     # Check if the sponsor belongs to the current user
-    if db_item.user_id != current_user["id"]:
+    if db_item.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not authorized to delete this sponsor")
 
     # Delete the sponsor

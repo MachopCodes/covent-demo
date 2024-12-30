@@ -1,6 +1,7 @@
 from .sponsor import Sponsor, SponsorCreate, SponsorUpdate
 from .user import User, UserCreate, UserUpdate, UserLogin
 from .event import Event, EventCreate, EventUpdate
+from .proposal import Proposal, ProposalCreate, ProposalUpdate
 
 __all__ = [
     "Sponsor",
@@ -12,5 +13,8 @@ __all__ = [
     "Event",
     "EventCreate", 
     "EventUpdate", 
-    "UserLogin"
+    "UserLogin",
+    "Proposal",
+    "ProposalCreate",
+    "ProposalUpdate"
     ]

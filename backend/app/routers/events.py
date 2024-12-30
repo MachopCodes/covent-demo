@@ -5,6 +5,8 @@ from typing import List
 from app.models import DBEvent
 from app.schemas.event import Event, EventCreate, EventUpdate
 from app.database import get_db
+from app.utils.dependencies import get_current_user
+from app.models.users import DBUser  # Assuming DBUser is the user model
 
 router = APIRouter(
     prefix="/events",
@@ -12,13 +14,16 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=Event)
-def create_event(event: EventCreate, db: Session = Depends(get_db)) -> Event:
+def create_event(
+    event: EventCreate,
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)
+) -> Event:
     """
-    Create a new event. Placeholder for user_id verification.
+    Create a new event and associate it with the current user.
     """
-    # TODO: Replace user_id with actual logged-in user verification.
-    user_id = 1  # Placeholder user ID
-    db_event = DBEvent(**event.dict(), user_id=user_id)
+    # Create the event object with the current user's ID
+    db_event = DBEvent(**event.model_dump(), user_id=current_user.id)
     db.add(db_event)
     db.commit()
     db.refresh(db_event)
@@ -28,7 +33,7 @@ def create_event(event: EventCreate, db: Session = Depends(get_db)) -> Event:
 @router.get("/", response_model=List[Event])
 def list_events(db: Session = Depends(get_db)) -> List[Event]:
     """
-    List all events.
+    Retrieve a list of all events.
     """
     events = db.query(DBEvent).all()
     return [Event.model_validate(event) for event in events]
@@ -37,7 +42,7 @@ def list_events(db: Session = Depends(get_db)) -> List[Event]:
 @router.get("/{event_id}", response_model=Event)
 def read_event(event_id: int, db: Session = Depends(get_db)) -> Event:
     """
-    Get a specific event by ID.
+    Retrieve details of a specific event by ID.
     """
     db_event = db.query(DBEvent).filter(DBEvent.id == event_id).first()
     if not db_event:
@@ -46,20 +51,24 @@ def read_event(event_id: int, db: Session = Depends(get_db)) -> Event:
 
 
 @router.put("/{event_id}", response_model=Event)
-def update_event(event_id: int, event: EventUpdate, db: Session = Depends(get_db)) -> Event:
+def update_event(
+    event_id: int,
+    event: EventUpdate,
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)
+) -> Event:
     """
-    Update an existing event. Placeholder for user_id verification.
+    Update an existing event. Only the event owner can update it.
     """
     db_event = db.query(DBEvent).filter(DBEvent.id == event_id).first()
+
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # TODO: Replace user_id with actual logged-in user verification.
-    user_id = 1  # Placeholder user ID
-    if db_event.user_id != user_id:
+    if db_event.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not authorized to update this event")
 
-    for key, value in event.dict(exclude_unset=True).items():
+    for key, value in event.model_dump(exclude_unset=True).items():
         setattr(db_event, key, value)
     db.commit()
     db.refresh(db_event)
@@ -67,17 +76,20 @@ def update_event(event_id: int, event: EventUpdate, db: Session = Depends(get_db
 
 
 @router.delete("/{event_id}", response_model=Event)
-def delete_event(event_id: int, db: Session = Depends(get_db)) -> Event:
+def delete_event(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)
+) -> Event:
     """
-    Delete an existing event. Placeholder for user_id verification.
+    Delete an existing event. Only the event owner can delete it.
     """
     db_event = db.query(DBEvent).filter(DBEvent.id == event_id).first()
+
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
 
-    # TODO: Replace user_id with actual logged-in user verification.
-    user_id = 1  # Placeholder user ID
-    if db_event.user_id != user_id:
+    if db_event.user_id != current_user.id:
         raise HTTPException(status_code=403, detail="You are not authorized to delete this event")
 
     db.delete(db_event)

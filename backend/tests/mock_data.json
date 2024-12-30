@@ -198,5 +198,14 @@
       "topics": ["Supply Chain", "Logistics Solutions"],
       "event_attendee_personas": ["Supply chain managers", "Logistics professionals"],
       "key_objectives_for_event_sponsorship": ["Networking with logistics experts", "Increase global brand recognition"]
+    },
+    {
+      "name": "Test Event",
+      "event_overview": "An event all about testing",
+      "target_attendees": [
+        "QA Engineers"
+      ],
+      "sponsorship_value": "lots of people will be at this event",
+      "contact_info": "string@string.com"
     }
   ]
