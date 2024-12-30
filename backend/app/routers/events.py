@@ -17,12 +17,11 @@ router = APIRouter(
 def create_event(
     event: EventCreate,
     db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_user)
+    current_user: DBUser = Depends(get_current_user)  # Token required
 ) -> Event:
     """
     Create a new event and associate it with the current user.
     """
-    # Create the event object with the current user's ID
     db_event = DBEvent(**event.model_dump(), user_id=current_user.id)
     db.add(db_event)
     db.commit()
@@ -31,22 +30,34 @@ def create_event(
 
 
 @router.get("/", response_model=List[Event])
-def list_events(db: Session = Depends(get_db)) -> List[Event]:
+def list_events(
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)  # Token required
+) -> List[Event]:
     """
-    Retrieve a list of all events.
+    Retrieve a list of all events. Requires authentication.
     """
-    events = db.query(DBEvent).all()
+    events = db.query(DBEvent).filter(DBEvent.user_id == current_user.id).all()
     return [Event.model_validate(event) for event in events]
 
 
 @router.get("/{event_id}", response_model=Event)
-def read_event(event_id: int, db: Session = Depends(get_db)) -> Event:
+def read_event(
+    event_id: int,
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)  # Token required
+) -> Event:
     """
-    Retrieve details of a specific event by ID.
+    Retrieve details of a specific event by ID. Requires authentication.
     """
-    db_event = db.query(DBEvent).filter(DBEvent.id == event_id).first()
+    db_event = db.query(DBEvent).filter(
+        DBEvent.id == event_id,
+        DBEvent.user_id == current_user.id
+    ).first()
+
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
+
     return Event.model_validate(db_event)
 
 
@@ -55,18 +66,18 @@ def update_event(
     event_id: int,
     event: EventUpdate,
     db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_user)
+    current_user: DBUser = Depends(get_current_user)  # Token required
 ) -> Event:
     """
-    Update an existing event. Only the event owner can update it.
+    Update an existing event. Only the event owner can update it. Requires authentication.
     """
-    db_event = db.query(DBEvent).filter(DBEvent.id == event_id).first()
+    db_event = db.query(DBEvent).filter(
+        DBEvent.id == event_id,
+        DBEvent.user_id == current_user.id
+    ).first()
 
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
-
-    if db_event.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You are not authorized to update this event")
 
     for key, value in event.model_dump(exclude_unset=True).items():
         setattr(db_event, key, value)
@@ -79,18 +90,18 @@ def update_event(
 def delete_event(
     event_id: int,
     db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_user)
+    current_user: DBUser = Depends(get_current_user)  # Token required
 ) -> Event:
     """
-    Delete an existing event. Only the event owner can delete it.
+    Delete an existing event. Only the event owner can delete it. Requires authentication.
     """
-    db_event = db.query(DBEvent).filter(DBEvent.id == event_id).first()
+    db_event = db.query(DBEvent).filter(
+        DBEvent.id == event_id,
+        DBEvent.user_id == current_user.id
+    ).first()
 
     if not db_event:
         raise HTTPException(status_code=404, detail="Event not found")
-
-    if db_event.user_id != current_user.id:
-        raise HTTPException(status_code=403, detail="You are not authorized to delete this event")
 
     db.delete(db_event)
     db.commit()
