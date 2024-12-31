@@ -28,8 +28,7 @@ def create_event(
     db.refresh(db_event)
     return Event.model_validate(db_event)
 
-
-@router.get("/", response_model=List[Event])
+@router.get("/mine", response_model=List[Event])
 def list_events(
     db: Session = Depends(get_db),
     current_user: DBUser = Depends(get_current_user)  # Token required
@@ -39,6 +38,18 @@ def list_events(
     """
     events = db.query(DBEvent).filter(DBEvent.user_id == current_user.id).all()
     return [Event.model_validate(event) for event in events]
+
+@router.get("/", response_model=List[Event])
+def list_events(
+    db: Session = Depends(get_db),
+    current_user: DBUser = Depends(get_current_user)  # Token required
+) -> List[Event]:
+    """
+    Retrieve a list of all events. Requires authentication.
+    """
+    events = db.query(DBEvent).all()
+    return [Event.model_validate(event) for event in events]
+
 
 
 @router.get("/{event_id}", response_model=Event)
@@ -52,7 +63,6 @@ def read_event(
     """
     db_event = db.query(DBEvent).filter(
         DBEvent.id == event_id,
-        DBEvent.user_id == current_user.id
     ).first()
 
     if not db_event:

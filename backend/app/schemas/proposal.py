@@ -1,6 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
-from app.models.proposals import ProposalStatus
 
 class EventSnapshot(BaseModel):
     name: str
@@ -18,7 +17,7 @@ class Proposal(BaseModel):
     owner_id: int
     notes: Optional[str] = Field(None, description="Additional details about the proposal")
     contact_info: Optional[str] = Field(None, description="Sponsor's contact information")
-    status: ProposalStatus
+    status: str
     event_snapshot: EventSnapshot
     sponsor_snapshot: SponsorSnapshot
 
@@ -30,7 +29,7 @@ class ProposalCreate(BaseModel):
     sponsor_id: int
     notes: Optional[str] = Field(None, description="Additional details about the proposal")
     contact_info: Optional[str] = Field(None, description="Sponsor's contact information")
-    status: ProposalStatus = 'PENDING'
+    status: str = 'PENDING'
     event_snapshot: EventSnapshot
     sponsor_snapshot: SponsorSnapshot
 
@@ -38,4 +37,4 @@ class ProposalCreate(BaseModel):
 class ProposalUpdate(BaseModel):
     notes: Optional[str] = Field(None, description="Additional details about the proposal")
     contact_info: Optional[str] = Field(None, description="Sponsor's contact information")
-    status: Optional[ProposalStatus] = None
+    status: Optional[str] = None

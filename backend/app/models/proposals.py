@@ -1,13 +1,7 @@
 from sqlalchemy import Column, Integer, String, Enum, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import JSONB
-import enum
 from app.models.base import Base
 
-# Enum for status
-class ProposalStatus(enum.Enum):
-    APPROVED = "APPROVED"
-    PENDING = "PENDING"
-    REJECTED = "REJECTED"
 
 class DBProposal(Base):
     __tablename__ = "proposals"

@@ -84,7 +84,6 @@ def update_proposal(
     """
     db_proposal = db.query(DBProposal).filter(
         DBProposal.id == proposal_id,
-        DBProposal.owner_id == current_user.id
     ).first()
 
     if not db_proposal:
