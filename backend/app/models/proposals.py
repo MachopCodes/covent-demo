@@ -25,7 +25,7 @@ class DBProposal(Base):
     contact_info = Column(String(255), nullable=True)
 
     # Status field using Enum
-    status = Column(Enum(ProposalStatus), nullable=False, default=ProposalStatus.PENDING)
+    status = Column(String, nullable=False)
 
     # Snapshot fields (stored as JSON)
     event_snapshot = Column(JSONB, nullable=False)  # JSON field for event details
