@@ -35,9 +35,26 @@ https://covent-demo.vercel.app/docs
 
 ### **3. User Authentication**
 - **Login and Registration:** Authenticate users to access features.
-- **Preloaded Test User:**
+- **Preloaded Test User with Sponsors:**
   - Username: `mock2`
   - Password: `mock`
+- **Preloaded Test User with Events:**
+  - Username: `mock`
+  - Password: `mock`
+
+
+## Example User Flow
+
+- Log in as a user or register a user
+- Create an Event
+- View sponsors
+- Select a sponsor and create a proposal for that sponsor
+- View Proposals and you can see your outbound proposal
+- Log in as mock2 (owns all sponsors)
+- View proposals and you can see inbound proposals which you may accept or reject
+    - Future iterations would have a messaging system here
+
+There is no way in this demo to create sponsors as a user in this demonstration
 
 
 ## Tech Stack
