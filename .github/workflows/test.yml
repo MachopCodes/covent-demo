@@ -26,6 +26,9 @@ jobs:
       - name: Add Backend to PYTHONPATH
         run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/backend" >> $GITHUB_ENV
 
+      - name: Set environment variables
+        run: echo "DATABASE_URL=sqlite:///test.db" >> $GITHUB_ENV
+
       - name: Run Tests with Coverage
         run: |
           pytest backend/tests --cov=app --cov-fail-under=80
