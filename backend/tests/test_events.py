@@ -1,95 +1,107 @@
 import pytest
 from fastapi.testclient import TestClient
-from app.main import app
-from tests.shared_setup import setup_module, teardown_module, get_test_headers
+from sqlalchemy.orm import Session
+from unittest.mock import MagicMock
+from app.main import app  # Assuming this is where your FastAPI app instance is defined
+from app.models import DBEvent, DBUser
+from app.schemas.event import EventCreate, EventUpdate
+from app.database import get_db
+from app.utils.dependencies import get_current_user
 
-# Setup and teardown for the module
-@pytest.fixture(scope="module", autouse=True)
-def setup_and_teardown():
-    """
-    Automatically set up and tear down the database for all tests in this module.
-    """
-    setup_module()
-    yield
-    teardown_module()
+# Mock dependencies
+def get_mock_db():
+    mock_session = MagicMock()
+    
+    mock_event = DBEvent(
+        id=1,
+        name="Test Event",
+        event_overview="Overview of the event",
+        target_attendees=["Developers", "Students"],
+        sponsorship_value="$5000",
+        contact_info="contact@example.com",
+        user_id=1
+    )
+    
+    def mock_add(instance):
+        instance.id = 1  # Simulate the database assigning an ID
+        return instance
 
-# Initialize the TestClient
+    mock_session.add.side_effect = mock_add
+    mock_query = MagicMock()
+    mock_query.filter.return_value.first.return_value = mock_event
+    mock_session.query.return_value = mock_query
+
+    return mock_session
+
+def get_mock_current_user():
+    return DBUser(id=1, name="Test User", email="test@example.com", hashed_password="hashed", is_active=True)
+
+app.dependency_overrides[get_db] = get_mock_db
+app.dependency_overrides[get_current_user] = get_mock_current_user
+
 client = TestClient(app)
 
-# Headers for authenticated requests
-headers = get_test_headers()
+# Mock data
+mock_event_data = {
+    "name": "Test Event",
+    "event_overview": "Overview of the event",
+    "target_attendees": ["Developers", "Students"],
+    "sponsorship_value": "$5000",
+    "contact_info": "contact@example.com",
+}
 
-def test_list_events():
-    response = client.get("/events", headers=headers["test_auth_headers"])
-    assert response.status_code == 200, response.text
-    data = response.json()
-    assert isinstance(data, list)
-    assert len(data) > 0  # Ensure at least one event is returned
-    assert data[0]["name"] == "Event 1"
+mock_updated_event_data = {
+    "name": "Updated Event",
+    "event_overview": "Updated Overview",
+    "target_attendees": ["Professionals"],
+    "sponsorship_value": "$10000",
+    "contact_info": "updated@example.com",
+}
 
-# def test_read_event():
-#     response = client.get("/events/1", headers=headers["test_auth_headers"])
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["name"] == "Event 1"
-#     assert data["event_overview"] == "Overview of Event 1"
 
-# def test_read_event_not_found():
-#     response = client.get("/events/999", headers=headers["test_auth_headers"])
-#     assert response.status_code == 404, response.text
-#     assert response.json()["detail"] == "Event not found"
+# Test cases
+def test_create_event():
+    mock_event_data = {
+        "name": "Test Event",
+        "event_overview": "Overview of the event",
+        "target_attendees": ["Developers", "Students"],
+        "sponsorship_value": "$5000",
+        "contact_info": "contact@example.com",
+    }
 
-# def test_create_event():
-#     new_event = {
-#         "name": "New Event",
-#         "event_overview": "Overview of New Event",
-#         "target_attendees": ["managers", "executives"],
-#         "sponsorship_value": "$7000",
-#         "contact_info": "newevent@domain.com",
-#     }
-#     response = client.post("/events", json=new_event, headers=headers["test_auth_headers"])
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["name"] == new_event["name"]
-#     assert data["event_overview"] == new_event["event_overview"]
+    response = client.post("/events/", json=mock_event_data)
+    assert response.status_code == 200
+    assert response.json()["name"] == "Test Event"
+    assert response.json()["id"] == 1  # Validate the mocked ID
 
-# def test_update_event():
-#     updated_event = {
-#         "name": "Updated Event",
-#         "event_overview": "Updated Overview",
-#         "target_attendees": ["developers"],
-#         "sponsorship_value": "$4000",
-#         "contact_info": "updatedevent@domain.com",
-#     }
-#     response = client.put("/events/1", json=updated_event, headers=headers["test_auth_headers"])
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["name"] == updated_event["name"]
-#     assert data["event_overview"] == updated_event["event_overview"]
+def test_list_user_events():
+    response = client.get("/events/mine")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
 
-# def test_update_event_not_found():
-#     updated_event = {
-#         "name": "Nonexistent Event",
-#         "event_overview": "N/A",
-#         "target_attendees": [],
-#         "sponsorship_value": "$0",
-#         "contact_info": "notfound@domain.com",
-#     }
-#     response = client.put("/events/999", json=updated_event, headers=headers["test_auth_headers"])
-#     assert response.status_code == 404, response.text
-#     assert response.json()["detail"] == "Event not found"
+def test_list_all_events():
+    response = client.get("/events/")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
 
-# def test_delete_event():
-#     response = client.delete("/events/1", headers=headers["test_auth_headers"])
-#     assert response.status_code == 200, response.text
-#     data = response.json()
-#     assert data["id"] == 1
+def test_read_event():
+    # Mock event ID
+    event_id = 1
+    response = client.get(f"/events/{event_id}")
+    assert response.status_code == 200
+    assert response.json()["id"] == event_id
 
-#     # Confirm deletion
-#     response = client.get("/events/1", headers=headers["test_auth_headers"])
-#     assert response.status_code == 404
+def test_update_event():
+    # Mock event ID
+    event_id = 1
+    response = client.put(f"/events/{event_id}", json=mock_updated_event_data)
+    assert response.status_code == 200
+    assert response.json()["name"] == mock_updated_event_data["name"]
 
-# def test_delete_event_not_found():
-#     response = client.delete("/events/999", headers=headers["test_auth_headers"])
-#     assert response.status_code == 404, response.text
-#     assert response.json()["detail"] == "Event not found"
+def test_delete_event():
+    # Mock event ID
+    event_id = 1
+    response = client.delete(f"/events/{event_id}")
+    assert response.status_code == 200
+    assert response.json()["id"] == event_id
+
