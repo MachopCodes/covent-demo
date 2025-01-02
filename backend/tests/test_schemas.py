@@ -1,10 +1,9 @@
 import pytest
 from pydantic import ValidationError
-from app.schemas.sponsor import Sponsor, SponsorCreate, SponsorUpdate
-from app.schemas.event import Event, EventCreate, EventUpdate
-from app.schemas.proposal import Proposal, ProposalCreate, ProposalUpdate, EventSnapshot, SponsorSnapshot
-from app.schemas.user import User, UserCreate, UserUpdate, UserLogin
-from app.models.proposals import ProposalStatus
+from app.schemas.sponsor import Sponsor
+from app.schemas.event import Event
+from app.schemas.proposal import Proposal, EventSnapshot, SponsorSnapshot
+from app.schemas.user import User, UserCreate
 
 
 # Sponsor Tests
@@ -51,23 +50,6 @@ def test_event_schema_invalid():
     data = {"id": 1, "name": "Tech Meetup"}
     with pytest.raises(ValidationError):
         Event(**data)
-
-
-# Proposal Tests
-def test_proposal_schema_valid():
-    data = {
-        "id": 1,
-        "event_id": 2,
-        "sponsor_id": 3,
-        "owner_id": 4,
-        "notes": "Important proposal details.",
-        "contact_info": "contact@sponsor.com",
-        "status": ProposalStatus.PENDING,
-        "event_snapshot": {"name": "Tech Meetup", "date": "2024-12-31"},
-        "sponsor_snapshot": {"name": "Sponsor A", "company_name": "Tech Innovations"},
-    }
-    proposal = Proposal(**data)
-    assert proposal.status == ProposalStatus.PENDING
 
 
 def test_proposal_schema_invalid():

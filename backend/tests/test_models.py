@@ -5,7 +5,6 @@
 # from sqlalchemy.dialects.postgresql import ARRAY
 # from sqlalchemy.dialects.sqlite import JSON
 # from app.models import Base, DBEvent, DBProposal, DBSponsor, DBUser
-# from app.models.proposals import ProposalStatus
 # from sqlalchemy.types import Enum, String
 # from sqlalchemy.dialects.postgresql import JSONB, ARRAY
 # from sqlalchemy.dialects.sqlite import JSON
@@ -132,46 +131,3 @@
 
 #     assert event.id is not None
 #     assert event.name == "Tech Meetup"
-
-
-# # Tests for DBProposal
-# def test_create_proposal(db_session):
-#     user = DBUser(name="Proposal Owner", email="owner@example.com", hashed_password="password")
-#     sponsor = DBSponsor(
-#         name="Sponsor A",
-#         job_title="CEO",
-#         company_name="Sponsor Co.",
-#         budget=5000.0,
-#         industry="Tech",
-#         topics=["AI", "ML"],
-#         event_attendee_personas=["Developers"],
-#         key_objectives_for_event_sponsorship=["Visibility"],
-#         user_id=user.id,
-#     )
-#     event = DBEvent(
-#         name="Tech Conference",
-#         event_overview="Conference for tech enthusiasts",
-#         target_attendees=["Developers", "Startups"],
-#         sponsorship_value="10,000 USD",
-#         contact_info="info@techconference.com",
-#         user_id=user.id,
-#     )
-#     db_session.add_all([user, sponsor, event])
-#     db_session.commit()
-
-#     proposal = DBProposal(
-#         event_id=event.id,
-#         sponsor_id=sponsor.id,
-#         owner_id=user.id,
-#         notes="This is a test proposal",
-#         contact_info="contact@example.com",
-#         status=ProposalStatus.PENDING,
-#         event_snapshot={"name": "Tech Conference", "date": "2024-12-31"},
-#         sponsor_snapshot={"name": "Sponsor A", "company_name": "Sponsor Co."},
-#     )
-#     db_session.add(proposal)
-#     db_session.commit()
-#     db_session.refresh(proposal)
-
-#     assert proposal.id is not None
-#     assert proposal.status == ProposalStatus.PENDING
