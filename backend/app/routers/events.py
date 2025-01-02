@@ -42,10 +42,9 @@ def list_events(
 @router.get("/", response_model=List[Event])
 def list_events(
     db: Session = Depends(get_db),
-    current_user: DBUser = Depends(get_current_user)  # Token required
 ) -> List[Event]:
     """
-    Retrieve a list of all events. Requires authentication.
+    Retrieve a list of all events.
     """
     events = db.query(DBEvent).all()
     return [Event.model_validate(event) for event in events]
